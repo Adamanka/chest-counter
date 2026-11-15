@@ -1,24 +1,101 @@
+import { useCallback, useEffect, useState } from 'react'
+import { useAppStore } from '@/store/appStore'
+import { useUiStore } from '@/store/uiStore'
+import { useI18n } from '@/hooks/useI18n'
+import { useHotkeys } from '@/hooks/useHotkeys'
+import { useClickSound } from '@/hooks/useClickSound'
+import { useTheme } from '@/hooks/useTheme'
+import { Header } from '@/components/layout/Header'
+import { Nav } from '@/components/layout/Nav'
+import { Footer } from '@/components/layout/Footer'
+import { isTabId, type TabId } from '@/components/layout/tabs'
+import { CounterPanel } from '@/components/counter/CounterPanel'
+import { StatsPanel } from '@/components/stats/StatsPanel'
+import { HistoryPanel } from '@/components/history/HistoryPanel'
+import { GoalsPanel } from '@/components/goals/GoalsPanel'
+import { SettingsPanel } from '@/components/settings/SettingsPanel'
+import { CorruptedBanner } from '@/components/CorruptedBanner'
+import { Toast } from '@/components/ui/Toast'
+
+function tabFromHash(): TabId {
+  const raw = window.location.hash.replace(/^#\/?/, '')
+  return isTabId(raw) ? raw : 'counter'
+}
+
 function App() {
+  useTheme()
+  const { t } = useI18n()
+  const [tab, setTab] = useState<TabId>(tabFromHash)
+
+  const selectedTypeId = useUiStore((state) => state.selectedTypeId)
+  const showToast = useUiStore((state) => state.showToast)
+  const hotkeysEnabled = useAppStore((state) => state.settings.hotkeys)
+  const addChest = useAppStore((state) => state.addChest)
+  const decrementChest = useAppStore((state) => state.decrementChest)
+  const undo = useAppStore((state) => state.undo)
+  const redo = useAppStore((state) => state.redo)
+  const playClick = useClickSound()
+
+  useEffect(() => {
+    const onHashChange = (): void => {
+      setTab(tabFromHash())
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => {
+      window.removeEventListener('hashchange', onHashChange)
+    }
+  }, [])
+
+  const navigate = useCallback((next: TabId) => {
+    setTab(next)
+    window.location.hash = `#/${next}`
+  }, [])
+
+  const handleAdd = useCallback(() => {
+    addChest(selectedTypeId)
+    playClick()
+  }, [addChest, selectedTypeId, playClick])
+
+  const handleRemove = useCallback(() => {
+    decrementChest(selectedTypeId)
+  }, [decrementChest, selectedTypeId])
+
+  const handleUndo = useCallback(() => {
+    const ok = undo()
+    if (!ok) showToast('info', t('toast.nothingToUndo'))
+  }, [undo, showToast, t])
+
+  const handleRedo = useCallback(() => {
+    const ok = redo()
+    if (!ok) showToast('info', t('toast.nothingToRedo'))
+  }, [redo, showToast, t])
+
+  useHotkeys(hotkeysEnabled, handleAdd, handleRemove, handleUndo, handleRedo)
+
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-ink-200 bg-white/70 px-4 py-3 backdrop-blur dark:border-ink-800 dark:bg-ink-900/70">
-        <div className="mx-auto flex max-w-6xl items-center gap-3">
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="h-8 w-8" />
-          <span className="text-lg font-bold">Chest Counter</span>
-          <span className="muted text-sm">bootstrap</span>
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
-        <h1 className="text-3xl font-bold">Project bootstrap</h1>
-        <p className="muted mt-2">
-          Tooling is in place. Features are implemented in stage 2.
-        </p>
+      <a
+        href="#main"
+        className="sr-only rounded-lg bg-brand-400 px-3 py-2 font-semibold text-ink-900 focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
+      >
+        {t('app.skipToContent')}
+      </a>
+
+      <Header />
+      <Nav active={tab} onChange={navigate} />
+
+      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-4">
+        <h1 className="sr-only">{t('app.title')}</h1>
+        <CorruptedBanner />
+        {tab === 'counter' ? <CounterPanel /> : null}
+        {tab === 'stats' ? <StatsPanel /> : null}
+        {tab === 'history' ? <HistoryPanel /> : null}
+        {tab === 'goals' ? <GoalsPanel /> : null}
+        {tab === 'settings' ? <SettingsPanel /> : null}
       </main>
-      <footer className="border-t border-ink-200 px-4 py-6 text-center text-sm dark:border-ink-800">
-        <p className="muted">
-          Unofficial fan project, not affiliated with Epic Games
-        </p>
-      </footer>
+
+      <Footer />
+      <Toast />
     </div>
   )
 }
