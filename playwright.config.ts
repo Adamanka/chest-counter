@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4173
-const baseURL = `http://127.0.0.1:${PORT}`
+const PORT = '4173'
+const baseURL = `http://localhost:${PORT}`
 
 export default defineConfig({
   testDir: './e2e',
