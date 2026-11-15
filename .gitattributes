@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+.gitattributes text eol=lf
+.husky/* text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
