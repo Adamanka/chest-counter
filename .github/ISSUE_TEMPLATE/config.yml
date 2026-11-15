@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project roadmap
+    url: https://github.com/OWNER/chest-counter/blob/main/docs/ROADMAP.md
+    about: Check what is intentionally out of scope for v1.

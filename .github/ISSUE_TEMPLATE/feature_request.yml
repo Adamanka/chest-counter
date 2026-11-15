@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an improvement
+title: 'feat: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check `docs/ROADMAP.md` first — some ideas are intentionally out of
+        scope for v1.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints
+      options:
+        - label: This does not require game APIs, parsing or automation
+          required: true
+        - label: This does not require Epic Games assets or logos
+          required: true

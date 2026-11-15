@@ -1,0 +1,12 @@
+dist
+coverage
+node_modules
+package-lock.json
+playwright-report
+test-results
+blob-report
+*.md
+!README.md
+!CONTRIBUTING.md
+!docs/**/*.md
+!.github/**/*.md
